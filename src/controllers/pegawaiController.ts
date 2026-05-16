@@ -6,9 +6,11 @@ import MasterJabatan from '../models/MasterJabatan';
 import MasterUnitKerja from '../models/MasterUnitKerja';
 import User from '../models/User';
 import Riwayat from '../models/Riwayat';
+import sequelize from '../config/database';
 import bcrypt from 'bcryptjs';
+import fs from 'fs';
 
-const transformPegawai = (p: any) => {
+export const transformPegawai = (p: any) => {
     return {
         id: p.id.toString(),
         nip: p.nip,
@@ -123,6 +125,11 @@ export const createPegawai = async (req: any, res: Response) => {
             avatar: req.file?.path
         });
 
+        // Save file to disk only after DB success
+        if (req.file) {
+            fs.writeFileSync(req.file.fullPath, req.file.buffer);
+        }
+
         // Re-fetch to get includes
         const fullData = await Pegawai.findByPk(data.id, {
             include: [
@@ -190,6 +197,11 @@ export const updatePegawai = async (req: any, res: Response) => {
             },
             { where: { nip: pegawai.nip } }
         );
+
+        // Save file to disk only after DB success
+        if (req.file) {
+            fs.writeFileSync(req.file.fullPath, req.file.buffer);
+        }
         
         const updatedData = await Pegawai.findByPk(id as string, {
             include: [
@@ -207,16 +219,26 @@ export const updatePegawai = async (req: any, res: Response) => {
 };
 
 export const deletePegawai = async (req: Request, res: Response) => {
+    const transaction = await sequelize.transaction();
     try {
         const { id } = req.params;
-        const deleted = await Pegawai.destroy({ where: { id } });
         
-        if (deleted) {
-            return res.json({ success: true, message: 'Pegawai deleted' });
+        const pegawai = await Pegawai.findByPk(id as string);
+        if (!pegawai) {
+            await transaction.rollback();
+            return res.status(404).json({ success: false, message: 'Pegawai not found' });
         }
+
+        // Delete associated User account if exists
+        await User.destroy({ where: { nip: pegawai.nip }, transaction });
         
-        res.status(404).json({ success: false, message: 'Pegawai not found' });
+        // Delete Pegawai (Cascade should handle Riwayat and Approval if DB configured, but we can be explicit or rely on Sequelize if associations are set with onDelete: 'CASCADE')
+        await pegawai.destroy({ transaction });
+        
+        await transaction.commit();
+        res.json({ success: true, message: 'Pegawai and associated user account deleted' });
     } catch (error: any) {
+        await transaction.rollback();
         res.status(500).json({ success: false, message: error.message });
     }
 };
@@ -234,7 +256,7 @@ export const createAccountForPegawai = async (req: Request, res: Response) => {
             return res.status(404).json({ success: false, message: 'Pegawai not found' });
         }
 
-        const targetEmail = email || pegawai.email || `${pegawai.nip}@simpeg.local`;
+        const targetEmail = email || pegawai.email || `${pegawai.nip}@sikapas.local`;
 
         // Check if NIP already exists
         const existingNip = await User.findOne({ where: { nip: pegawai.nip } });

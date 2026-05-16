@@ -22,7 +22,7 @@ module.exports = {
         jabatan_id: 1, 
         golongan_id: 14, 
         unit_kerja_id: 2, 
-        email: 'ahmad.subagja@simpeg.local',
+        email: 'ahmad.subagja@sikapas.local',
         phone: '081234567890',
         tmt_pangkat: '2022-04-01',
         tmt_kgb: '2023-01-01',

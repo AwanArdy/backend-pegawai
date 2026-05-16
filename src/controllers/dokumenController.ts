@@ -1,5 +1,7 @@
 import { Request, Response } from 'express';
 import DokumenPenting from '../models/DokumenPenting';
+import fs from 'fs';
+import path from 'path';
 
 export const getAllDokumen = async (req: Request, res: Response) => {
     try {
@@ -7,6 +9,27 @@ export const getAllDokumen = async (req: Request, res: Response) => {
             order: [['created_at', 'DESC']]
         });
         res.json({ success: true, data });
+    } catch (error: any) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+export const downloadDokumen = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+        const doc = await DokumenPenting.findByPk(id as string);
+
+        if (!doc) {
+            return res.status(404).json({ success: false, message: 'Document not found' });
+        }
+
+        const filePath = path.join(process.cwd(), doc.file_url);
+
+        if (!fs.existsSync(filePath)) {
+            return res.status(404).json({ success: false, message: 'File not found on server' });
+        }
+
+        res.download(filePath, doc.name + path.extname(doc.file_url));
     } catch (error: any) {
         res.status(500).json({ success: false, message: error.message });
     }
@@ -30,6 +53,11 @@ export const createDokumen = async (req: any, res: Response) => {
             size,
             file_url
         });
+
+        // Save file to disk only after DB success
+        if (req.file) {
+            fs.writeFileSync(req.file.fullPath, req.file.buffer);
+        }
 
         res.status(201).json({ success: true, data });
     } catch (error: any) {

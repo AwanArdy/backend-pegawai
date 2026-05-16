@@ -29,26 +29,9 @@ export const processUpload = async (req: any, res: Response, next: NextFunction)
     if (!req.file) return next();
 
     const fileName = `${Date.now()}-${req.file.originalname.replace(/\s+/g, '-')}`;
-    const filePath = path.join('uploads', fileName);
-
-    try {
-/*
-        if (req.file.mimetype.startsWith('image/')) {
-            // Compress Image
-            await sharp(req.file.buffer)
-                .resize(1200, 1200, { fit: 'inside', withoutEnlargement: true })
-                .jpeg({ quality: 80 })
-                .toFile(filePath);
-        } else {
-*/
-            // Save PDF or other files directly from buffer
-            fs.writeFileSync(filePath, req.file.buffer);
-//      }
-
-        // Attach the saved file path to req object
-        req.file.path = `/uploads/${fileName}`;
-        next();
-    } catch (error) {
-        next(error);
-    }
+    
+    // Just attach the intended path and filename, don't write to disk yet
+    req.file.path = `/uploads/${fileName}`;
+    req.file.fullPath = path.join('uploads', fileName);
+    next();
 };

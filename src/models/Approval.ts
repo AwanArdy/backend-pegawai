@@ -55,5 +55,6 @@ Approval.init(
 );
 
 Approval.belongsTo(Pegawai, { foreignKey: 'pegawai_id', as: 'pegawai' });
+Pegawai.hasMany(Approval, { foreignKey: 'pegawai_id', as: 'approvals', onDelete: 'CASCADE' });
 
 export default Approval;

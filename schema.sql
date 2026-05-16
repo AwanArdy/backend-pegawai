@@ -1,5 +1,5 @@
-CREATE DATABASE IF NOT EXISTS simpeg_db;
-USE simpeg_db;
+CREATE DATABASE IF NOT EXISTS sikapas_db;
+USE sikapas_db;
 
 -- Tabel users
 CREATE TABLE IF NOT EXISTS users (

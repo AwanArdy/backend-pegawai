@@ -49,7 +49,7 @@ Sebelum menjalankan proyek ini, pastikan Anda telah menginstal:
 
 ## Setup Database
 
-1. **Buat database baru** di MySQL dengan nama yang sesuai di `.env` (contoh: `simpeg_db`).
+1. **Buat database baru** di MySQL dengan nama yang sesuai di `.env` (contoh: `sikapas_db`).
 2. **Jalankan Migrasi** untuk membuat tabel-tabel yang diperlukan:
    ```bash
    npx sequelize-cli db:migrate

@@ -3,14 +3,25 @@ import Approval from '../models/Approval';
 import Pegawai from '../models/Pegawai';
 import Riwayat from '../models/Riwayat';
 import sequelize from '../config/database';
+import fs from 'fs';
 
-export const getAllApprovals = async (req: Request, res: Response) => {
+export const getAllApprovals = async (req: any, res: Response) => {
     try {
         const { status, type } = req.query;
         const whereClause: any = {};
         
         if (status) whereClause.status = status;
         if (type) whereClause.type = type;
+
+        // If user is pegawai, only show their own approvals
+        if (req.user.role === 'pegawai') {
+            const pegawai = await Pegawai.findOne({ where: { nip: req.user.nip } });
+            if (pegawai) {
+                whereClause.pegawai_id = pegawai.id;
+            } else {
+                return res.json({ success: true, data: [] });
+            }
+        }
 
         const data = await Approval.findAll({
             where: whereClause,
@@ -26,15 +37,33 @@ export const getAllApprovals = async (req: Request, res: Response) => {
 
 export const createApproval = async (req: any, res: Response) => {
     try {
-        const { pegawai_id, type } = req.body;
-        const dokumen_url = req.file?.savedPath;
+        let { pegawai_id, type } = req.body;
+        const dokumen_url = req.file?.path;
+
+        // If user is pegawai, always use their own pegawai record
+        if (req.user.role === 'pegawai') {
+            const pegawai = await Pegawai.findOne({ where: { nip: req.user.nip } });
+            if (!pegawai) {
+                return res.status(404).json({ success: false, message: 'Pegawai data not found' });
+            }
+            pegawai_id = pegawai.id;
+        }
+
+        if (!pegawai_id) {
+            return res.status(400).json({ success: false, message: 'pegawai_id is required' });
+        }
 
         const data = await Approval.create({
             pegawai_id,
-            type,
+            type: type || 'Lainnya',
             dokumen_url,
             status: 'pending'
         });
+
+        // Save file to disk only after DB success
+        if (req.file) {
+            fs.writeFileSync(req.file.fullPath, req.file.buffer);
+        }
 
         res.status(201).json({ success: true, data });
     } catch (error: any) {

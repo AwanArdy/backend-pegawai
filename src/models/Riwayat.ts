@@ -1,5 +1,6 @@
 import { DataTypes, Model } from 'sequelize';
 import sequelize from '../config/database';
+import Pegawai from './Pegawai';
 
 class Riwayat extends Model {
   declare id: number;
@@ -22,6 +23,10 @@ Riwayat.init(
     pegawai_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      references: {
+        model: Pegawai,
+        key: 'id'
+      }
     },
     type: {
       type: DataTypes.ENUM('pangkat', 'kgb', 'dokumen', 'approval'),

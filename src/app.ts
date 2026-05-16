@@ -10,6 +10,7 @@ import pegawaiRoutes from './routes/pegawaiRoutes';
 import approvalRoutes from './routes/approvalRoutes';
 import dashboardRoutes from './routes/dashboardRoutes';
 import dokumenRoutes from './routes/dokumenRoutes';
+import reminderRoutes from './routes/reminderRoutes';
 
 
 dotenv.config();
@@ -27,7 +28,7 @@ app.use(cors({
 }));
 
 app.use(express.json());
-app.use('/uploads', express.static('uploads'));
+app.use('/api/uploads', express.static('uploads'));
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -38,11 +39,12 @@ app.use('/api/pegawai', pegawaiRoutes);
 app.use('/api/approvals', approvalRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/dokumen', dokumenRoutes);
+app.use('/api/reminders', reminderRoutes);
 
 
 // Health Check
 app.get('/api/health', (req: Request, res: Response) => {
-    res.json({ status: 'ok', message: 'Backend SIMPEG TypeScript is running' });
+    res.json({ status: 'ok', message: 'Backend SIKAPAS TypeScript is running' });
 });
 
 // Error Handling Middleware

@@ -111,9 +111,10 @@ Pegawai.init(
 Pegawai.belongsTo(MasterJabatan, { foreignKey: 'jabatan_id', as: 'jabatan' });
 Pegawai.belongsTo(MasterGolongan, { foreignKey: 'golongan_id', as: 'golongan' });
 Pegawai.belongsTo(MasterUnitKerja, { foreignKey: 'unit_kerja_id', as: 'unit_kerja' });
-Pegawai.hasOne(User, { foreignKey: 'nip', sourceKey: 'nip', as: 'user' });
-Pegawai.hasMany(Riwayat, { foreignKey: 'pegawai_id', as: 'riwayats' });
+Pegawai.hasOne(User, { foreignKey: 'nip', sourceKey: 'nip', as: 'user', onDelete: 'CASCADE' });
+Pegawai.hasMany(Riwayat, { foreignKey: 'pegawai_id', as: 'riwayats', onDelete: 'CASCADE' });
 
+User.belongsTo(Pegawai, { foreignKey: 'nip', targetKey: 'nip', as: 'pegawai' });
 
 
 export default Pegawai;
