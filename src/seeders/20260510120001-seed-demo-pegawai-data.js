@@ -4,6 +4,19 @@ module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.bulkInsert('pegawai', [
       {
+        nip: 'admin',
+        nama: 'Demo Admin User',
+        jabatan_id: 1, 
+        golongan_id: 13, 
+        unit_kerja_id: 2, 
+        email: 'admin@demo.local',
+        phone: '08111111111',
+        tmt_pangkat: '2020-01-01',
+        tmt_kgb: '2022-01-01',
+        tanggal_masuk: '2010-01-01',
+        status: 'aktif'
+      },
+      {
         nip: 'pegawai',
         nama: 'Demo Pegawai User',
         jabatan_id: 3, 
@@ -33,6 +46,6 @@ module.exports = {
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.bulkDelete('pegawai', { nip: ['pegawai', '198501012010011001'] }, {});
+    await queryInterface.bulkDelete('pegawai', { nip: ['admin', 'pegawai', '198501012010011001'] }, {});
   }
 };
